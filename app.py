@@ -20,9 +20,7 @@ with open("nufus_veri.json", "r") as nufus_veri_file:
 def text_tabanli(data):
     addres = data["prompt"].split("/")[0].split(",")
     prompt = data["prompt"].split("/")[1]
-    print(prompt)
     durum_katsayi = (k_model.tahmini_etki_alani(prompt))
-    print("durum: ", durum_katsayi)
 
     city = addres[0]
     street = addres[1]
@@ -46,7 +44,6 @@ def text_tabanli(data):
     
     lat = data[0]['lat']
     lon = data[0]['lon']
-    ###print(f"Koordinatlar: {lat}, {lon}")
     
 
     return {"mode":"address_search","address":{"coordinate_lat":data[0]['lat'],"coordinate_lon":data[0]['lon']}, "_line": data[0]["geojson"], "_prompt":prompt}
@@ -105,7 +102,6 @@ def ikincil_fetch_roads_from_area(geojson_polygon):
 
         # Kullanılan node'ları da ekle
         for node_id in used_node_ids:
-            print(node_id)
             node = node_map.get(node_id)
             if node:
                 filtered_elements.append(node)
@@ -158,7 +154,6 @@ def ikincil_fetch_roads_from_area(geojson_polygon):
 
         # Kullanılan node'ları da ekle
         for node_id in used_node_ids:
-            print(node_id)
             node = node_map.get(node_id)
             if node:
                 filtered_elements.append(node)
@@ -213,7 +208,6 @@ def fetch_buildings_from_area(geojson_data):
         url = "https://overpass-api.de/api/interpreter"
         response = requests.post(url, data=query, timeout=120)
         response.raise_for_status()
-        #print(response.json())
         return response.json()
 
 
@@ -221,22 +215,16 @@ def bolge_tabanli(data):
 
     areas = data["areas"]
     prompt = data["prompt"]
-    print(prompt)
     durum_katsayi = k_model.tahmini_etki_alani(prompt)
-    print(durum_katsayi)
     yolanaliz = 0
     binaanaliz = 1
 
 
     if any(word in prompt.lower() for word in ["sokak", "cadde", "yol", "yolun"]):
         yolanaliz = 1
-        ###print("yol analizi var.")
 
     if any(word in prompt.lower() for word in ["bina", "binalar", "binaların"]):
-        # print("bina analizi var.")
         binaanaliz = 1
-
-    print(yolanaliz, binaanaliz)
 
     etkilenecek_binalar = []
     etkilenecek_yollar = []
@@ -258,7 +246,6 @@ def bolge_tabanli(data):
             mahalle_veri = requests.get(f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={ex_coor[1]}&lon={ex_coor[0]}", headers={'User-Agent': 'MyAppName/1.0 (myemail@example.com)'}).json()
             mahalle = mahalle_veri["address"]["suburb"].split(" ")[0].lower()
         except:
-            print(area)
             ex_coor = area["geometry"]["coordinates"][0][0]
             mahalle_veri = requests.get(f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={ex_coor[1]}&lon={ex_coor[0]}", headers={'User-Agent': 'MyAppName/1.0 (myemail@example.com)'}).json()
             mahalle = mahalle_veri["address"]["suburb"].split(" ")[0].lower()
@@ -276,7 +263,6 @@ def bolge_tabanli(data):
 
 
         bolgeler.append({"elements":geojson})
-        ###print("analiz_ediliyor")
 
         durumdan_etkilenen_genc_nufus = []
         durumdan_etkilenen_genc_nufus_orani = []
@@ -287,10 +273,8 @@ def bolge_tabanli(data):
         if binaanaliz:
             birincil_bolgedeki_binalar = []
             ikincil_bolgedeki_binalar = []
-            ###print("bina analizi yapiyorum")
             # (birincil derece)
-            ###print(geojson)
-            print("c")
+
 
             birincil_bolgedeki_binalar = fetch_buildings_from_area(geojson)
 
@@ -366,7 +350,6 @@ def bolge_tabanli(data):
 
             
 
-            print("a")
             #birincil_bolgedeki_binalar = []
 
             # (ikincil derece)
@@ -377,7 +360,6 @@ def bolge_tabanli(data):
                 
             except:
                 pass
-            print("b")
 
             etkilenecek_binalar.append({
                 "birincil_derece": birincil_bolgedeki_binalar, 
@@ -388,7 +370,6 @@ def bolge_tabanli(data):
         # muhtemel etkilenecek yollar. 
 
         if yolanaliz:
-            ###print("yol analizi yapiyorum")
             birincil_bolgedeki_yollar = ikincil_fetch_roads_from_area(geojson)
             etkilenecek_yollar.append({
                 "birincil_derece": birincil_bolgedeki_yollar
@@ -405,12 +386,10 @@ def bolge_tabanli(data):
         "prompt": prompt
     }
 
-    print(ai_veri)
     ai_answer = json.loads(aistdio.generate(ai_veri))
     #with open("ornek_cikti.json", "r") as file:
     #    ai_answer = json.loads(file.read())
 
-        ###print("analiz_edildi.")
     return {"etkilenecek_binalar": etkilenecek_binalar, "etkilenecek_yollar":etkilenecek_yollar, "mode":"area", "ai_response":ai_answer}
 
 
@@ -434,10 +413,8 @@ def api():
     data = request.get_json()
 
     if len(data["areas"]) == 0:
-        ###print("sadece metin tabanli")
         return_json = text_tabanli(data)
     else:
-
         return_json = bolge_tabanli(data)
 
     return return_json
