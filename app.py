@@ -332,11 +332,11 @@ def bolge_tabanli(data):
         
             durumdan_etkilenen_genc_nufus = (birincil_bolgedeki_bina_sayisi / ortalama_bina_sayisi) * mahalle_genc_nufus
             durumdan_etkilenen_genc_nufus_orani = round((durumdan_etkilenen_genc_nufus / mahalle_yetiskin_nufus) * 100,2)
-            durumdan_etkilenen_genc_nufus = model.etkilenen_nufus_predict(durumdan_etkilenen_genc_nufus)
+            durumdan_etkilenen_genc_nufus = k_model.etkilenen_nufus_predict(durumdan_etkilenen_genc_nufus)
 
             durumdan_etkilenen_yetiskin_nufus = (birincil_bolgedeki_bina_sayisi / ortalama_bina_sayisi) * mahalle_yetiskin_nufus
             durumdan_etkilenen_yetiskin_nufus_orani = round((durumdan_etkilenen_yetiskin_nufus / mahalle_yetiskin_nufus) * 100,2)
-            durumdan_etkilenen_yetiskin_nufus = model.etkilenen_nufus_predict(durumdan_etkilenen_yetiskin_nufus)
+            durumdan_etkilenen_yetiskin_nufus = k_model.etkilenen_nufus_predict(durumdan_etkilenen_yetiskin_nufus)
             toplam_genc_nufus += durumdan_etkilenen_genc_nufus
             toplam_genc_nufus_orani += durumdan_etkilenen_genc_nufus_orani 
 
